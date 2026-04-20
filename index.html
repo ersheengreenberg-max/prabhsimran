@@ -22,4 +22,488 @@ h1 { font-size: 22px; font-weight: 500; margin-bottom: 16px; }
 h2 { font-size: 18px; font-weight: 500; margin-bottom: 12px; }
 h3 { font-size: 15px; font-weight: 500; margin-bottom: 10px; }
 .card { background: white; border: 1px solid #e5e5e0; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
-.grid-4 { display:
+.grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 16px; }
+.metric { background: #f8f8f6; border-radius: 8px; padding: 14px; }
+.metric-label { font-size: 12px; color: #666; margin-bottom: 4px; }
+.metric-value { font-size: 22px; font-weight: 500; }
+input, select, textarea { width: 100%; padding: 8px 10px; border: 1px solid #d3d1c7; border-radius: 6px; font-size: 14px; background: white; font-family: inherit; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: #1a1a1a; }
+textarea { min-height: 120px; font-family: monospace; font-size: 13px; }
+label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+.btn { background: #1a1a1a; color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 14px; cursor: pointer; font-weight: 500; }
+.btn:hover { background: #000; }
+.btn-sec { background: transparent; color: #1a1a1a; border: 1px solid #d3d1c7; padding: 7px 12px; font-size: 13px; border-radius: 6px; cursor: pointer; }
+.btn-danger { background: transparent; color: #c00; border: 1px solid #e5e5e0; padding: 5px 10px; font-size: 12px; border-radius: 6px; cursor: pointer; }
+.btn-small { padding: 4px 10px; font-size: 12px; background: #e6f1fb; color: #0c447c; border: none; border-radius: 6px; cursor: pointer; }
+.row { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #e5e5e0; gap: 10px; }
+.row:last-child { border-bottom: none; }
+.badge { font-size: 11px; padding: 3px 8px; border-radius: 10px; font-weight: 500; }
+.b-red { background: #fcebeb; color: #791f1f; }
+.b-amber { background: #faeeda; color: #633806; }
+.b-green { background: #eaf3de; color: #27500a; }
+.b-blue { background: #e6f1fb; color: #0c447c; }
+.small { font-size: 12px; color: #666; }
+.form-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-bottom: 10px; }
+.error { color: #791f1f; font-size: 13px; padding: 10px; background: #fcebeb; border-radius: 6px; margin-bottom: 10px; }
+.success { color: #27500a; font-size: 13px; padding: 10px; background: #eaf3de; border-radius: 6px; margin-bottom: 10px; }
+.hidden { display: none; }
+.chip { padding: 4px 10px; background: #e6f1fb; color: #0c447c; border-radius: 10px; font-size: 12px; cursor: pointer; border: none; font-family: monospace; margin: 2px; }
+.gp-pos { color: #27500a; font-weight: 500; }
+.gp-neg { color: #791f1f; font-weight: 500; }
+.totals-box { background: #f8f8f6; padding: 10px 14px; border-radius: 8px; margin: 10px 0; font-size: 13px; }
+.totals-box .row { padding: 5px 0; border-bottom: 1px dashed #e5e5e0; }
+@media (max-width: 600px) { .nav-links { font-size: 12px; } .nav-links button { padding: 4px 7px; } }
+</style>
+</head>
+<body>
+
+<div id="login-view" class="login-wrap">
+  <div class="login-card">
+    <h1 style="text-align: center; margin-bottom: 4px;">Prabhsimran Industries</h1>
+    <p class="small" style="text-align: center; margin-bottom: 24px;">Management system</p>
+    <div style="margin-bottom: 12px;">
+      <label>Email</label>
+      <input type="email" id="login-email" autofocus />
+    </div>
+    <div style="margin-bottom: 16px;">
+      <label>Password</label>
+      <input type="password" id="login-password" />
+    </div>
+    <div id="login-error" class="error hidden"></div>
+    <button class="btn" id="login-btn" style="width: 100%;">Login</button>
+  </div>
+</div>
+
+<div id="app-view" class="hidden">
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand" id="firm-name">Prabhsimran Industries</div>
+      <div class="nav-links" id="nav-links">
+        <button data-tab="dash" class="active">Dashboard</button>
+        <button data-tab="sup">Suppliers</button>
+        <button data-tab="stock">Stock</button>
+        <button data-tab="party">Parties</button>
+        <button data-tab="bill">Bills</button>
+        <button data-tab="pay">Payments</button>
+        <button data-tab="team">Team</button>
+        <button data-tab="log">Reminders</button>
+      </div>
+      <button class="btn-sec" id="logout-btn">Logout</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="v-dash">
+      <h1>Dashboard</h1>
+      <div class="grid-4">
+        <div class="metric"><div class="metric-label">Suppliers</div><div class="metric-value" id="m-sup">0</div></div>
+        <div class="metric"><div class="metric-label">Parties</div><div class="metric-value" id="m-party">0</div></div>
+        <div class="metric"><div class="metric-label">Pending</div><div class="metric-value" id="m-pend">₹0</div></div>
+        <div class="metric"><div class="metric-label">Overdue bills</div><div class="metric-value" style="color:#c00;" id="m-over">0</div></div>
+      </div>
+      <div class="card">
+        <h3>Overdue bills</h3>
+        <div id="overdue-list"><div class="small">Loading...</div></div>
+      </div>
+      <div class="card">
+        <h3>Upcoming (7 days)</h3>
+        <div id="upcoming-list"><div class="small">Loading...</div></div>
+      </div>
+    </div>
+
+    <div id="v-sup" class="hidden">
+      <h1>Suppliers</h1>
+      <div class="card">
+        <h3>Add supplier</h3>
+        <div class="form-grid">
+          <input id="sup-name" placeholder="Company name (SD International, Satia etc.)" />
+          <input id="sup-phone" placeholder="Phone" />
+          <input id="sup-contact" placeholder="Contact person" />
+          <input id="sup-gstin" placeholder="GSTIN (optional)" />
+        </div>
+        <button class="btn" id="sup-add-btn">Add supplier</button>
+      </div>
+      <div class="card">
+        <h3>Suppliers list</h3>
+        <div id="sup-list"><div class="small">Loading...</div></div>
+      </div>
+    </div>
+
+    <div id="v-stock" class="hidden">
+      <h1>Stock</h1>
+      <div class="card">
+        <h3>Add item</h3>
+        <div class="form-grid">
+          <input id="stock-name" placeholder="Item name" />
+          <input id="stock-unit" placeholder="Unit (kg/bag/pc)" />
+          <input id="stock-rate" type="number" placeholder="Default sale rate" />
+        </div>
+        <button class="btn" id="stock-add-btn">Add item</button>
+      </div>
+      <div class="card">
+        <h3>Items</h3>
+        <div id="stock-list"><div class="small">Loading...</div></div>
+      </div>
+    </div>
+
+    <div id="v-party" class="hidden">
+      <h1>Parties (customers)</h1>
+      <div class="card">
+        <h3>Add party</h3>
+        <div class="form-grid">
+          <input id="party-name" placeholder="Party name" />
+          <input id="party-phone" placeholder="Phone" />
+          <input id="party-email" placeholder="Email" />
+          <select id="party-owner"><option value="">Assign to team</option></select>
+          <input id="party-credit" type="number" placeholder="Credit days (30)" />
+        </div>
+        <button class="btn" id="party-add-btn">Add party</button>
+      </div>
+      <div class="card">
+        <h3>Parties list</h3>
+        <div id="party-list"><div class="small">Loading...</div></div>
+      </div>
+    </div>
+
+    <div id="v-bill" class="hidden">
+      <h1>Bills / Sales</h1>
+      <div class="card">
+        <h3>Create bill</h3>
+        <div class="form-grid">
+          <select id="bill-party"><option value="">Select party</option></select>
+          <input id="bill-inv" placeholder="Invoice no." />
+          <input id="bill-due" type="date" />
+          <input id="bill-item" placeholder="Item name" />
+          <input id="bill-qty" type="number" placeholder="Qty" />
+          <input id="bill-rate" type="number" placeholder="Sale rate" />
+          <input id="bill-cost" type="number" placeholder="Cost rate" />
+          <input id="bill-freight" type="number" placeholder="Freight" />
+        </div>
+        <button class="btn" id="bill-add-btn">Create bill</button>
+      </div>
+      <div class="card">
+        <h3>All bills</h3>
+        <div id="bill-list"><div class="small">Loading...</div></div>
+      </div>
+    </div>
+
+    <div id="v-pay" class="hidden">
+      <h1>Payments</h1>
+      <div class="card">
+        <h3>Record payment</h3>
+        <div class="form-grid">
+          <select id="pay-bill"><option value="">Select bill</option></select>
+          <input id="pay-amount" type="number" placeholder="Amount" />
+          <input id="pay-date" type="date" />
+          <input id="pay-mode" placeholder="Mode (UPI/cash/cheque)" />
+        </div>
+        <button class="btn" id="pay-add-btn">Record</button>
+      </div>
+    </div>
+
+    <div id="v-team" class="hidden">
+      <h1>Team members</h1>
+      <div class="card">
+        <h3>Team list</h3>
+        <div id="team-list"><div class="small">Loading...</div></div>
+        <div class="small" style="margin-top: 10px;">
+          Naye team member add karne ke liye: Supabase Dashboard, Authentication, Add user
+        </div>
+      </div>
+    </div>
+
+    <div id="v-log" class="hidden">
+      <h1>Reminders and Message</h1>
+      <div class="card">
+        <h3>Send reminder</h3>
+        <div class="form-grid">
+          <select id="rem-bill"><option value="">Select overdue bill</option></select>
+        </div>
+        <button class="btn" id="rem-btn">Generate reminder message</button>
+        <div id="rem-preview" class="hidden" style="margin-top: 12px; background: #DCF8C6; padding: 12px; border-radius: 8px; white-space: pre-line; font-size: 13px; line-height: 1.5;"></div>
+      </div>
+      <div class="card">
+        <h3>Recent reminders sent</h3>
+        <div id="log-list"><div class="small">Loading...</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://jsezsrqswfbrqehkcgzh.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpzZXpzcnFzd2ZicnFlaGtjZ3poIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY2MjMyMjUsImV4cCI6MjA5MjE5OTIyNX0.SI4BHQMWs69S3bEdcoTR3UMgEDcI22EW_tj0dgTcMWE';
+
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let orgData = null;
+let teamList = [];
+let partyList = [];
+let supplierList = [];
+let stockList = [];
+let billList = [];
+
+const fmt = n => 'Rs ' + Math.round(n || 0).toLocaleString('en-IN');
+const today = () => new Date().toISOString().slice(0, 10);
+
+async function checkAuth() {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    showApp();
+  }
+}
+
+document.getElementById('login-btn').onclick = async () => {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const errDiv = document.getElementById('login-error');
+  errDiv.classList.add('hidden');
+  const { data, error } = await sb.auth.signInWithPassword({ email, password });
+  if (error) {
+    errDiv.textContent = error.message;
+    errDiv.classList.remove('hidden');
+    return;
+  }
+  currentUser = data.user;
+  showApp();
+};
+
+document.getElementById('logout-btn').onclick = async () => {
+  await sb.auth.signOut();
+  currentUser = null;
+  document.getElementById('app-view').classList.add('hidden');
+  document.getElementById('login-view').classList.remove('hidden');
+};
+
+async function showApp() {
+  document.getElementById('login-view').classList.add('hidden');
+  document.getElementById('app-view').classList.remove('hidden');
+  await loadAll();
+}
+
+async function loadAll() {
+  const { data: org } = await sb.from('organizations').select('*').single();
+  orgData = org;
+  if (org) document.getElementById('firm-name').textContent = org.name;
+
+  const { data: team } = await sb.from('team_members').select('*');
+  teamList = team || [];
+
+  const { data: suppliers } = await sb.from('suppliers').select('*').order('name');
+  supplierList = suppliers || [];
+
+  const { data: stock } = await sb.from('stock_items').select('*').order('name');
+  stockList = stock || [];
+
+  const { data: parties } = await sb.from('parties').select('*').order('name');
+  partyList = parties || [];
+
+  const { data: bills } = await sb.from('bill_balances').select('*').order('due_date');
+  billList = bills || [];
+
+  render();
+}
+
+function render() {
+  document.getElementById('m-sup').textContent = supplierList.length;
+  document.getElementById('m-party').textContent = partyList.length;
+  const pending = billList.reduce((s, b) => s + Number(b.balance || 0), 0);
+  document.getElementById('m-pend').textContent = fmt(pending);
+  const overdue = billList.filter(b => b.status === 'overdue');
+  document.getElementById('m-over').textContent = overdue.length;
+
+  const overdueList = document.getElementById('overdue-list');
+  overdueList.innerHTML = overdue.length === 0 ? '<div class="small">No overdue bills</div>' :
+    overdue.map(b => {
+      const party = partyList.find(p => p.id === b.party_id);
+      return '<div class="row"><div><div style="font-weight:500;">' + (party ? party.name : 'Unknown') + ' <span class="badge b-red">' + b.days_overdue + 'd late</span></div><div class="small">' + b.invoice_no + '</div></div><div style="font-weight:500; color:#c00;">' + fmt(b.balance) + '</div></div>';
+    }).join('');
+
+  const upcoming = billList.filter(b => b.status === 'upcoming');
+  const upList = document.getElementById('upcoming-list');
+  upList.innerHTML = upcoming.length === 0 ? '<div class="small">No upcoming dues</div>' :
+    upcoming.map(b => {
+      const party = partyList.find(p => p.id === b.party_id);
+      return '<div class="row"><div><div style="font-weight:500;">' + (party ? party.name : '') + '</div><div class="small">' + b.invoice_no + '</div></div><div>' + fmt(b.balance) + '</div></div>';
+    }).join('');
+
+  const supListDiv = document.getElementById('sup-list');
+  supListDiv.innerHTML = supplierList.length === 0 ? '<div class="small">No suppliers yet</div>' :
+    supplierList.map(s => '<div class="row"><div><div style="font-weight:500;">' + s.name + '</div><div class="small">' + (s.phone || '') + ' ' + (s.contact_person ? '- ' + s.contact_person : '') + '</div></div><button class="btn-danger" onclick="delItem(\'suppliers\',\'' + s.id + '\')">Del</button></div>').join('');
+
+  const stockListDiv = document.getElementById('stock-list');
+  stockListDiv.innerHTML = stockList.length === 0 ? '<div class="small">No items yet</div>' :
+    stockList.map(s => '<div class="row"><div><div style="font-weight:500;">' + s.name + '</div><div class="small">Unit: ' + s.unit + ' - Rate: ' + fmt(s.default_sale_rate) + '</div></div><button class="btn-danger" onclick="delItem(\'stock_items\',\'' + s.id + '\')">Del</button></div>').join('');
+
+  const ownerSel = document.getElementById('party-owner');
+  ownerSel.innerHTML = '<option value="">Assign to team</option>' + teamList.map(t => '<option value="' + t.id + '">' + t.name + '</option>').join('');
+
+  const partyListDiv = document.getElementById('party-list');
+  partyListDiv.innerHTML = partyList.length === 0 ? '<div class="small">No parties yet</div>' :
+    partyList.map(p => {
+      const owner = teamList.find(t => t.id === p.owner_id);
+      return '<div class="row"><div><div style="font-weight:500;">' + p.name + '</div><div class="small">' + p.phone + ' - ' + p.credit_days + 'd - ' + (owner ? owner.name : 'unassigned') + '</div></div><button class="btn-danger" onclick="delItem(\'parties\',\'' + p.id + '\')">Del</button></div>';
+    }).join('');
+
+  const billPartySel = document.getElementById('bill-party');
+  billPartySel.innerHTML = '<option value="">Select party</option>' + partyList.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
+
+  const billListDiv = document.getElementById('bill-list');
+  billListDiv.innerHTML = billList.length === 0 ? '<div class="small">No bills yet</div>' :
+    billList.slice().reverse().map(b => {
+      const party = partyList.find(p => p.id === b.party_id);
+      const cls = b.status === 'paid' ? 'b-green' : b.status === 'overdue' ? 'b-red' : 'b-amber';
+      return '<div class="row"><div><div style="font-weight:500;">' + b.invoice_no + ' - ' + (party ? party.name : '') + '</div><div class="small">Due ' + b.due_date + ' - Total ' + fmt(b.total_amount) + '</div></div><div style="display:flex; gap:8px; align-items:center;"><span class="badge ' + cls + '">' + b.status + '</span><div style="font-weight:500;">' + fmt(b.balance) + '</div></div></div>';
+    }).join('');
+
+  const unpaid = billList.filter(b => Number(b.balance) > 0);
+  const payBillSel = document.getElementById('pay-bill');
+  payBillSel.innerHTML = '<option value="">Select bill</option>' + unpaid.map(b => {
+    const party = partyList.find(p => p.id === b.party_id);
+    return '<option value="' + b.id + '">' + b.invoice_no + ' - ' + (party ? party.name : '') + ' (' + fmt(b.balance) + ')</option>';
+  }).join('');
+
+  const remBillSel = document.getElementById('rem-bill');
+  remBillSel.innerHTML = '<option value="">Select overdue bill</option>' + overdue.map(b => {
+    const party = partyList.find(p => p.id === b.party_id);
+    return '<option value="' + b.id + '">' + b.invoice_no + ' - ' + (party ? party.name : '') + ' (' + b.days_overdue + 'd)</option>';
+  }).join('');
+
+  const teamDiv = document.getElementById('team-list');
+  teamDiv.innerHTML = teamList.map(t => '<div class="row"><div><div style="font-weight:500;">' + t.name + ' <span class="badge b-blue">' + t.role + '</span></div><div class="small">' + t.email + '</div></div></div>').join('');
+}
+
+async function delItem(table, id) {
+  if (!confirm('Delete karna hai?')) return;
+  const { error } = await sb.from(table).delete().eq('id', id);
+  if (error) return alert(error.message);
+  await loadAll();
+}
+window.delItem = delItem;
+
+document.getElementById('sup-add-btn').onclick = async () => {
+  const name = document.getElementById('sup-name').value.trim();
+  if (!name) return alert('Name daalo');
+  const { error } = await sb.from('suppliers').insert({
+    org_id: orgData.id, name,
+    phone: document.getElementById('sup-phone').value,
+    contact_person: document.getElementById('sup-contact').value,
+    gstin: document.getElementById('sup-gstin').value
+  });
+  if (error) return alert(error.message);
+  ['sup-name','sup-phone','sup-contact','sup-gstin'].forEach(i => document.getElementById(i).value = '');
+  await loadAll();
+};
+
+document.getElementById('stock-add-btn').onclick = async () => {
+  const name = document.getElementById('stock-name').value.trim();
+  if (!name) return alert('Name daalo');
+  const { error } = await sb.from('stock_items').insert({
+    org_id: orgData.id, name,
+    unit: document.getElementById('stock-unit').value || 'pc',
+    default_sale_rate: +document.getElementById('stock-rate').value || 0
+  });
+  if (error) return alert(error.message);
+  ['stock-name','stock-unit','stock-rate'].forEach(i => document.getElementById(i).value = '');
+  await loadAll();
+};
+
+document.getElementById('party-add-btn').onclick = async () => {
+  const name = document.getElementById('party-name').value.trim();
+  const phone = document.getElementById('party-phone').value.trim();
+  if (!name || !phone) return alert('Name aur phone daalo');
+  const { error } = await sb.from('parties').insert({
+    org_id: orgData.id, name, phone,
+    email: document.getElementById('party-email').value,
+    owner_id: document.getElementById('party-owner').value || null,
+    credit_days: +document.getElementById('party-credit').value || 30
+  });
+  if (error) return alert(error.message);
+  ['party-name','party-phone','party-email','party-credit'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('party-owner').value = '';
+  await loadAll();
+};
+
+document.getElementById('bill-add-btn').onclick = async () => {
+  const partyId = document.getElementById('bill-party').value;
+  if (!partyId) return alert('Party chuno');
+  const inv = document.getElementById('bill-inv').value.trim() || 'INV-' + (billList.length + 1);
+  const due = document.getElementById('bill-due').value || today();
+  const item = document.getElementById('bill-item').value.trim() || 'Item';
+  const qty = +document.getElementById('bill-qty').value || 1;
+  const rate = +document.getElementById('bill-rate').value || 0;
+  const cost = +document.getElementById('bill-cost').value || 0;
+  const freight = +document.getElementById('bill-freight').value || 0;
+  const subtotal = qty * rate;
+  const total = subtotal + freight;
+  const gp = (rate - cost) * qty;
+
+  const { data: billData, error: billErr } = await sb.from('bills').insert({
+    org_id: orgData.id, invoice_no: inv, party_id: partyId,
+    bill_date: today(), due_date: due,
+    subtotal, freight, total_amount: total, gp_amount: gp
+  }).select().single();
+
+  if (billErr) return alert(billErr.message);
+
+  await sb.from('bill_items').insert({
+    bill_id: billData.id, item_name: item,
+    qty, cost_rate: cost, sale_rate: rate, amount: subtotal, gp_amount: gp
+  });
+
+  ['bill-inv','bill-due','bill-item','bill-qty','bill-rate','bill-cost','bill-freight'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('bill-party').value = '';
+  await loadAll();
+  alert('Bill saved!');
+};
+
+document.getElementById('pay-add-btn').onclick = async () => {
+  const billId = document.getElementById('pay-bill').value;
+  const amount = +document.getElementById('pay-amount').value;
+  if (!billId || !amount) return alert('Bill aur amount daalo');
+  const { error } = await sb.from('payments').insert({
+    org_id: orgData.id, bill_id: billId, amount,
+    payment_date: document.getElementById('pay-date').value || today(),
+    mode: document.getElementById('pay-mode').value || 'cash'
+  });
+  if (error) return alert(error.message);
+  ['pay-amount','pay-date','pay-mode'].forEach(i => document.getElementById(i).value = '');
+  document.getElementById('pay-bill').value = '';
+  await loadAll();
+  alert('Payment recorded!');
+};
+
+document.getElementById('rem-btn').onclick = () => {
+  const billId = document.getElementById('rem-bill').value;
+  if (!billId) return alert('Bill chuno');
+  const bill = billList.find(b => b.id === billId);
+  const party = partyList.find(p => p.id === bill.party_id);
+  const msg = 'Namaste ' + party.name + ' ji,\n\n' + orgData.name + ' se reminder:\nInvoice ' + bill.invoice_no + ' ka payment Rs ' + Math.round(bill.balance).toLocaleString('en-IN') + ' pending hai.\n' + bill.days_overdue + ' din overdue ho gaya hai.\n\nPayment options:\nBank: ' + orgData.bank_name + '\nA/c: ' + orgData.bank_account_no + '\nIFSC: ' + orgData.bank_ifsc + '\nUPI: ' + orgData.upi_id + '\n\nQuery: ' + orgData.owner_phone + '\n\n' + orgData.name;
+
+  const preview = document.getElementById('rem-preview');
+  preview.textContent = msg;
+  preview.classList.remove('hidden');
+
+  const encoded = encodeURIComponent(msg);
+  const phone = party.phone.replace(/\D/g, '');
+  const waLink = 'https://wa.me/91' + phone + '?text=' + encoded;
+  preview.innerHTML += '<br><br><a href="' + waLink + '" target="_blank" style="color:#25D366; font-weight:500;">WhatsApp pe bhejo</a>';
+};
+
+document.querySelectorAll('#nav-links button').forEach(btn => {
+  btn.onclick = () => {
+    document.querySelectorAll('#nav-links button').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const tab = btn.dataset.tab;
+    ['dash','sup','stock','party','bill','pay','team','log'].forEach(v => {
+      document.getElementById('v-' + v).classList.toggle('hidden', v !== tab);
+    });
+  };
+});
+
+checkAuth();
+</script>
+</body>
+</html>
