@@ -177,7 +177,7 @@ label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
           <input id="bill-qty" type="number" placeholder="Qty" />
           <input id="bill-rate" type="number" placeholder="Sale rate" />
           <input id="bill-cost" type="number" placeholder="Cost rate" />
-          <input id="bill-freight" type="number" placeholder="Freight" />
+          <input id="bill-freight" type="number" placeholder="Freight ₹" />
         </div>
         <button class="btn" id="bill-add-btn">Create bill</button>
       </div>
@@ -193,7 +193,7 @@ label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
         <h3>Record payment</h3>
         <div class="form-grid">
           <select id="pay-bill"><option value="">Select bill</option></select>
-          <input id="pay-amount" type="number" placeholder="Amount" />
+          <input id="pay-amount" type="number" placeholder="Amount ₹" />
           <input id="pay-date" type="date" />
           <input id="pay-mode" placeholder="Mode (UPI/cash/cheque)" />
         </div>
@@ -207,13 +207,13 @@ label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
         <h3>Team list</h3>
         <div id="team-list"><div class="small">Loading...</div></div>
         <div class="small" style="margin-top: 10px;">
-          Naye team member add karne ke liye: Supabase Dashboard, Authentication, Add user
+          Naye team member add karne ke liye: Supabase Dashboard → Authentication → Add user
         </div>
       </div>
     </div>
 
     <div id="v-log" class="hidden">
-      <h1>Reminders and Message</h1>
+      <h1>Reminders & Message</h1>
       <div class="card">
         <h3>Send reminder</h3>
         <div class="form-grid">
@@ -244,8 +244,9 @@ let supplierList = [];
 let stockList = [];
 let billList = [];
 
-const fmt = n => 'Rs ' + Math.round(n || 0).toLocaleString('en-IN');
+const fmt = n => '₹' + Math.round(n || 0).toLocaleString('en-IN');
 const today = () => new Date().toISOString().slice(0, 10);
+const daysDiff = d => Math.round((new Date(d) - new Date(today())) / 86400000);
 
 async function checkAuth() {
   const { data: { session } } = await sb.auth.getSession();
@@ -318,7 +319,13 @@ function render() {
   overdueList.innerHTML = overdue.length === 0 ? '<div class="small">No overdue bills</div>' :
     overdue.map(b => {
       const party = partyList.find(p => p.id === b.party_id);
-      return '<div class="row"><div><div style="font-weight:500;">' + (party ? party.name : 'Unknown') + ' <span class="badge b-red">' + b.days_overdue + 'd late</span></div><div class="small">' + b.invoice_no + '</div></div><div style="font-weight:500; color:#c00;">' + fmt(b.balance) + '</div></div>';
+      return `<div class="row">
+        <div>
+          <div style="font-weight:500;">${party?.name || 'Unknown'} <span class="badge b-red">${b.days_overdue}d late</span></div>
+          <div class="small">${b.invoice_no}</div>
+        </div>
+        <div style="font-weight:500; color:#c00;">${fmt(b.balance)}</div>
+      </div>`;
     }).join('');
 
   const upcoming = billList.filter(b => b.status === 'upcoming');
@@ -326,53 +333,73 @@ function render() {
   upList.innerHTML = upcoming.length === 0 ? '<div class="small">No upcoming dues</div>' :
     upcoming.map(b => {
       const party = partyList.find(p => p.id === b.party_id);
-      return '<div class="row"><div><div style="font-weight:500;">' + (party ? party.name : '') + '</div><div class="small">' + b.invoice_no + '</div></div><div>' + fmt(b.balance) + '</div></div>';
+      return `<div class="row">
+        <div><div style="font-weight:500;">${party?.name}</div><div class="small">${b.invoice_no}</div></div>
+        <div>${fmt(b.balance)}</div>
+      </div>`;
     }).join('');
 
   const supListDiv = document.getElementById('sup-list');
   supListDiv.innerHTML = supplierList.length === 0 ? '<div class="small">No suppliers yet</div>' :
-    supplierList.map(s => '<div class="row"><div><div style="font-weight:500;">' + s.name + '</div><div class="small">' + (s.phone || '') + ' ' + (s.contact_person ? '- ' + s.contact_person : '') + '</div></div><button class="btn-danger" onclick="delItem(\'suppliers\',\'' + s.id + '\')">Del</button></div>').join('');
+    supplierList.map(s => `<div class="row">
+      <div><div style="font-weight:500;">${s.name}</div><div class="small">${s.phone || ''} ${s.contact_person ? '· ' + s.contact_person : ''}</div></div>
+      <button class="btn-danger" onclick="delItem('suppliers','${s.id}')">Del</button>
+    </div>`).join('');
 
   const stockListDiv = document.getElementById('stock-list');
   stockListDiv.innerHTML = stockList.length === 0 ? '<div class="small">No items yet</div>' :
-    stockList.map(s => '<div class="row"><div><div style="font-weight:500;">' + s.name + '</div><div class="small">Unit: ' + s.unit + ' - Rate: ' + fmt(s.default_sale_rate) + '</div></div><button class="btn-danger" onclick="delItem(\'stock_items\',\'' + s.id + '\')">Del</button></div>').join('');
+    stockList.map(s => `<div class="row">
+      <div><div style="font-weight:500;">${s.name}</div><div class="small">Unit: ${s.unit} · Rate: ${fmt(s.default_sale_rate)}</div></div>
+      <button class="btn-danger" onclick="delItem('stock_items','${s.id}')">Del</button>
+    </div>`).join('');
 
   const ownerSel = document.getElementById('party-owner');
-  ownerSel.innerHTML = '<option value="">Assign to team</option>' + teamList.map(t => '<option value="' + t.id + '">' + t.name + '</option>').join('');
+  ownerSel.innerHTML = '<option value="">Assign to team</option>' + teamList.map(t => `<option value="${t.id}">${t.name}</option>`).join('');
 
   const partyListDiv = document.getElementById('party-list');
   partyListDiv.innerHTML = partyList.length === 0 ? '<div class="small">No parties yet</div>' :
     partyList.map(p => {
       const owner = teamList.find(t => t.id === p.owner_id);
-      return '<div class="row"><div><div style="font-weight:500;">' + p.name + '</div><div class="small">' + p.phone + ' - ' + p.credit_days + 'd - ' + (owner ? owner.name : 'unassigned') + '</div></div><button class="btn-danger" onclick="delItem(\'parties\',\'' + p.id + '\')">Del</button></div>';
+      return `<div class="row">
+        <div><div style="font-weight:500;">${p.name}</div><div class="small">${p.phone} · ${p.credit_days}d · ${owner?.name || 'unassigned'}</div></div>
+        <button class="btn-danger" onclick="delItem('parties','${p.id}')">Del</button>
+      </div>`;
     }).join('');
 
   const billPartySel = document.getElementById('bill-party');
-  billPartySel.innerHTML = '<option value="">Select party</option>' + partyList.map(p => '<option value="' + p.id + '">' + p.name + '</option>').join('');
+  billPartySel.innerHTML = '<option value="">Select party</option>' + partyList.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
 
   const billListDiv = document.getElementById('bill-list');
   billListDiv.innerHTML = billList.length === 0 ? '<div class="small">No bills yet</div>' :
     billList.slice().reverse().map(b => {
       const party = partyList.find(p => p.id === b.party_id);
       const cls = b.status === 'paid' ? 'b-green' : b.status === 'overdue' ? 'b-red' : 'b-amber';
-      return '<div class="row"><div><div style="font-weight:500;">' + b.invoice_no + ' - ' + (party ? party.name : '') + '</div><div class="small">Due ' + b.due_date + ' - Total ' + fmt(b.total_amount) + '</div></div><div style="display:flex; gap:8px; align-items:center;"><span class="badge ' + cls + '">' + b.status + '</span><div style="font-weight:500;">' + fmt(b.balance) + '</div></div></div>';
+      return `<div class="row">
+        <div><div style="font-weight:500;">${b.invoice_no} — ${party?.name}</div><div class="small">Due ${b.due_date} · Total ${fmt(b.total_amount)}</div></div>
+        <div style="display:flex; gap:8px; align-items:center;">
+          <span class="badge ${cls}">${b.status}</span>
+          <div style="font-weight:500;">${fmt(b.balance)}</div>
+        </div>
+      </div>`;
     }).join('');
 
   const unpaid = billList.filter(b => Number(b.balance) > 0);
   const payBillSel = document.getElementById('pay-bill');
   payBillSel.innerHTML = '<option value="">Select bill</option>' + unpaid.map(b => {
     const party = partyList.find(p => p.id === b.party_id);
-    return '<option value="' + b.id + '">' + b.invoice_no + ' - ' + (party ? party.name : '') + ' (' + fmt(b.balance) + ')</option>';
+    return `<option value="${b.id}">${b.invoice_no} - ${party?.name} (${fmt(b.balance)})</option>`;
   }).join('');
 
   const remBillSel = document.getElementById('rem-bill');
   remBillSel.innerHTML = '<option value="">Select overdue bill</option>' + overdue.map(b => {
     const party = partyList.find(p => p.id === b.party_id);
-    return '<option value="' + b.id + '">' + b.invoice_no + ' - ' + (party ? party.name : '') + ' (' + b.days_overdue + 'd)</option>';
+    return `<option value="${b.id}">${b.invoice_no} - ${party?.name} (${b.days_overdue}d)</option>`;
   }).join('');
 
   const teamDiv = document.getElementById('team-list');
-  teamDiv.innerHTML = teamList.map(t => '<div class="row"><div><div style="font-weight:500;">' + t.name + ' <span class="badge b-blue">' + t.role + '</span></div><div class="small">' + t.email + '</div></div></div>').join('');
+  teamDiv.innerHTML = teamList.map(t => `<div class="row">
+    <div><div style="font-weight:500;">${t.name} <span class="badge b-blue">${t.role}</span></div><div class="small">${t.email}</div></div>
+  </div>`).join('');
 }
 
 async function delItem(table, id) {
@@ -480,7 +507,21 @@ document.getElementById('rem-btn').onclick = () => {
   if (!billId) return alert('Bill chuno');
   const bill = billList.find(b => b.id === billId);
   const party = partyList.find(p => p.id === bill.party_id);
-  const msg = 'Namaste ' + party.name + ' ji,\n\n' + orgData.name + ' se reminder:\nInvoice ' + bill.invoice_no + ' ka payment Rs ' + Math.round(bill.balance).toLocaleString('en-IN') + ' pending hai.\n' + bill.days_overdue + ' din overdue ho gaya hai.\n\nPayment options:\nBank: ' + orgData.bank_name + '\nA/c: ' + orgData.bank_account_no + '\nIFSC: ' + orgData.bank_ifsc + '\nUPI: ' + orgData.upi_id + '\n\nQuery: ' + orgData.owner_phone + '\n\n' + orgData.name;
+  const msg = `Namaste ${party.name} ji,
+
+${orgData.name} se reminder:
+Invoice ${bill.invoice_no} ka payment ₹${Math.round(bill.balance).toLocaleString('en-IN')} pending hai.
+${bill.days_overdue} din overdue ho gaya hai.
+
+Payment options:
+Bank: ${orgData.bank_name}
+A/c: ${orgData.bank_account_no}
+IFSC: ${orgData.bank_ifsc}
+UPI: ${orgData.upi_id}
+
+Query: ${orgData.owner_phone}
+
+${orgData.name}`;
 
   const preview = document.getElementById('rem-preview');
   preview.textContent = msg;
@@ -488,8 +529,8 @@ document.getElementById('rem-btn').onclick = () => {
 
   const encoded = encodeURIComponent(msg);
   const phone = party.phone.replace(/\D/g, '');
-  const waLink = 'https://wa.me/91' + phone + '?text=' + encoded;
-  preview.innerHTML += '<br><br><a href="' + waLink + '" target="_blank" style="color:#25D366; font-weight:500;">WhatsApp pe bhejo</a>';
+  const waLink = `https://wa.me/91${phone}?text=${encoded}`;
+  preview.innerHTML += `\n\n<a href="${waLink}" target="_blank" style="color:#25D366; font-weight:500;">📱 WhatsApp pe bhejo</a>`;
 };
 
 document.querySelectorAll('#nav-links button').forEach(btn => {
